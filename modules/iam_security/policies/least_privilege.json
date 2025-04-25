@@ -1,0 +1,62 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Sid": "AllowBasicReadOnlyS3",
+        "Effect": "Allow",
+        "Action": [
+          "s3:GetObject",
+          "s3:ListBucket"
+        ],
+        "Resource": [
+          "arn:aws:s3:::*",
+          "arn:aws:s3:::*/*"
+        ]
+      },
+      {
+        "Sid": "AllowDescribeEC2",
+        "Effect": "Allow",
+        "Action": [
+          "ec2:DescribeInstances",
+          "ec2:DescribeRegions"
+        ],
+        "Resource": "*",
+        "Condition": {
+          "StringEquals": {
+            "aws:RequestedRegion": "us-east-1"
+          }
+        }
+      },
+      {
+        "Sid": "AllowCloudWatchLogsRead",
+        "Effect": "Allow",
+        "Action": [
+          "logs:GetLogEvents",
+          "logs:DescribeLogGroups",
+          "logs:DescribeLogStreams"
+        ],
+        "Resource": "*"
+      },
+      {
+        "Sid": "ExplicitDenyIAMUserActions",
+        "Effect": "Deny",
+        "Action": [
+          "iam:CreateUser",
+          "iam:DeleteUser"
+        ],
+        "Resource": "*"
+      },
+      {
+        "Sid": "DenyBareMetalInstanceTypes",
+        "Effect": "Deny",
+        "Action": "ec2:RunInstances",
+        "Resource": "*",
+        "Condition": {
+          "StringLike": {
+            "ec2:InstanceType": "*.metal"
+          }
+        }
+      }
+    ]
+  }
+  
