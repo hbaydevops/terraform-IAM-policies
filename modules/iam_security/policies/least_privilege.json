@@ -1,4 +1,4 @@
-{
+
     "Version": "2012-10-17",
     "Statement": [
       {
@@ -59,4 +59,131 @@
       }
     ]
   }
-  
+
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowBasicReadOnlyS3",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:ListAllMyBuckets"
+      ],
+      "Resource": [
+        "arn:aws:s3:::*",
+        "arn:aws:s3:::*/*"
+      ]
+    },
+    {
+      "Sid": "AllowTagging",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:CreateTags",
+        "rds:AddTagsToResource",
+        "tag:TagResources",
+        "tag:GetResources"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "DenyIAMChanges",
+      "Effect": "Deny",
+      "Action": [
+        "iam:Create*",
+        "iam:Delete*",
+        "iam:Put*",
+        "iam:Update*",
+        "iam:Add*",
+        "iam:Remove*"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "AllowDescribeEC2",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeInstances",
+        "ec2:DescribeRegions"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        }
+      }
+    },
+    {
+      "Sid": "AllowCloudWatchLogsRead",
+      "Effect": "Allow",
+      "Action": [
+        "logs:GetLogEvents",
+        "logs:DescribeLogGroups",
+        "logs:DescribeLogStreams"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "DenyNonGP3OrLargeEBS",
+      "Effect": "Deny",
+      "Action": [
+        "ec2:CreateVolume"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringNotEquals": {
+          "ec2:VolumeType": "gp3"
+        },
+        "NumericGreaterThan": {
+          "ec2:VolumeSize": 30
+        }
+      }
+    },
+    {
+      "Sid": "DenyInvalidRDS",
+      "Effect": "Deny",
+      "Action": [
+        "rds:CreateDBInstance"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringNotEqualsIfExists": {
+          "rds:Engine": ["mysql", "postgres"]
+        },
+        "NumericGreaterThanIfExists": {
+          "rds:AllocatedStorage": 30
+        }
+      }
+    },
+    {
+      "Sid": "EnforceNaming",
+      "Effect": "Deny",
+      "Action": "*",
+      "Resource": "*",
+      "Condition": {
+        "StringNotLikeIfExists": {
+          "aws:RequestTag/Name": "webforx-*"
+        }
+      }
+    },
+    {
+      "Sid": "ExplicitDenyIAMUserActions",
+      "Effect": "Deny",
+      "Action": [
+        "iam:CreateUser",
+        "iam:DeleteUser"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "DenyBareMetalInstanceTypes",
+      "Effect": "Deny",
+      "Action": "ec2:RunInstances",
+      "Resource": "*",
+      "Condition": {
+        "StringLike": {
+          "ec2:InstanceType": "*.metal"
+        }
+      }
+    }
+  ]
+}
